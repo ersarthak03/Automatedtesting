@@ -1,0 +1,121 @@
+Update apiserver.py for MySQL Integration
+Modify your database configuration to use MySQL instead of SQLite.
+
+Install MySQL dependencies:
+bash
+Copy
+Edit
+pip install mysqlclient pymysql sqlalchemy fastapi uvicorn
+Modify apiserver.py:
+Replace:
+
+python
+Copy
+Edit
+DATABASE_URL = "sqlite:///./test.db"
+With:
+
+python
+Copy
+Edit
+DATABASE_URL = "mysql+pymysql://<username>:<password>@<host>:<port>/<database>"
+Example:
+
+python
+Copy
+Edit
+DATABASE_URL = "mysql+pymysql://root:password@localhost:3306/mydatabase"
+Ensure that your MySQL database is created before running the app.
+
+Run:
+
+sql
+Copy
+Edit
+CREATE DATABASE mydatabase;
+2. Set Up a Git Repository
+Run the following in your project directory:
+
+bash
+Copy
+Edit
+git init
+git add .
+git commit -m "Initial commit"
+git branch -M main
+git remote add origin <your-repo-url>
+git push -u origin main
+3. Create a GitHub Actions CI/CD Pipeline
+Inside your project directory, create .github/workflows/cicd.yml:
+
+name: CI/CD Pipeline
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install fastapi uvicorn pytest requests sqlalchemy
+
+      - name: Start FastAPI Server
+        run: |
+          uvicorn apiserver:app --host 127.0.0.1 --port 8000 &  
+          sleep 3  # Wait for the server to start
+
+      - name: Run Tests
+        run: pytest testAutomation.py -v
+
+4. Add requirements.txt
+Create requirements.txt for dependencies:
+
+nginx
+Copy
+Edit
+fastapi
+uvicorn
+pytest
+sqlalchemy
+mysqlclient
+pymysql
+requests
+5. Automate Deployment
+If using Docker, create Dockerfile:
+
+dockerfile
+Copy
+Edit
+FROM python:3.10
+
+WORKDIR /app
+
+COPY . .
+
+RUN pip install -r requirements.txt
+
+CMD ["uvicorn", "apiserver:app", "--host", "0.0.0.0", "--port", "8000"]
+For Kubernetes or cloud deployment, configure Docker Compose, Kubernetes YAMLs, or AWS/GCP integrations.
+
+6. Push and Deploy
+Push your changes:
+
+bash
+Copy
+Edit
+git add .
+git commit -m "Added MySQL support and CI/CD"
+git push origin main
+Your pipeline will run automatically, ensuring tests pass before deploying.
+
+Would you like to add automated deployment to a server (AWS/GCP/Heroku)? 🚀
