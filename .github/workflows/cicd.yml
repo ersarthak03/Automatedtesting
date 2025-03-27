@@ -1,37 +1,28 @@
 name: CI/CD Pipeline
 
-on:
-  push:
-    branches:
-      - main
+on: [push, pull_request]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
-
-    services:
-      mysql:
-        image: mysql:5.7
-        env:
-          MYSQL_ROOT_PASSWORD: password
-          MYSQL_DATABASE: mydatabase
-        ports:
-          - 3306:3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
-
     steps:
-      - name: Checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v3
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: '3.11'
 
-      - name: Install dependencies
+      - name: Install Dependencies
         run: |
-          pip install -r requirements.txt
+          python -m pip install --upgrade pip
+          pip install fastapi uvicorn pytest requests sqlalchemy
 
-      - name: Run tests
+      - name: Start FastAPI Server
         run: |
-          pytest testAutomation.py
+          uvicorn apiserver:app --host 127.0.0.1 --port 8000 &  
+          sleep 3  # Wait for the server to start
+
+      - name: Run Tests
+        run: pytest testAutomation.py -v
